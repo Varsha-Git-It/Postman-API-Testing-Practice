@@ -1,0 +1,712 @@
+{
+  "info": {
+    "_postman_id": "34ad73f5-a731-4f9c-8c62-57a68c905200",
+    "name": "Library API collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "48206166",
+    "_collection_link": "https://go.postman.co/collection/48206166-34ad73f5-a731-4f9c-8c62-57a68c905200?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "ResponseValidation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", () => {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response time is below 5 seconds\", () => {\r\n    pm.expect(pm.response.responseTime).to.be.below(5000);\r\n});\r\n\r\npm.test(\"Response contains book records\", () => {\r\n    const data = pm.response.json();\r\n    pm.expect(data).to.be.an(\"array\");\r\n});\r\npm.test(\"Every book has a title\", () => {\r\n    const data = pm.response.json();\r\n\r\n    data.forEach((book) => {\r\n        pm.expect(book).to.have.property(\"title\");\r\n    });\r\n});\r\npm.test(\"First book has the expected title\", () => {\r\n    const data = pm.response.json();\r\n    pm.expect(data[0].title).to.equal(\"To Kill a Mockingbird\");\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://library-api.postmanlabs.com/books",
+          "protocol": "https",
+          "host": [
+            "library-api",
+            "postmanlabs",
+            "com"
+          ],
+          "path": [
+            "books"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get ErrorValidation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 404\", () => {\r\n    pm.expect(pm.response.code).to.equal(404);\r\n});\r\n\r\npm.test(\"Error message is correct\", () => {\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data.message).to.include(\"not found\");\r\n});\r\npm.test(\"Error message contains requested book ID\", () => {\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data.message).to.include(\r\n        \"550e8400-e29b-41d4-a716-446655440000\"\r\n    );\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://library-api.postmanlabs.com/books/550e8400-e29b-41d4-a716-446655440000",
+          "protocol": "https",
+          "host": [
+            "library-api",
+            "postmanlabs",
+            "com"
+          ],
+          "path": [
+            "books",
+            "550e8400-e29b-41d4-a716-446655440000"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Post request",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\r\npm.test(\"Status code is 201\", () => {\r\n    pm.expect(pm.response.code).to.equal(201);\r\n});\r\n\r\npm.test(\"Response contains a book ID\", () => {\r\n    const data = pm.response.json();\r\n    pm.expect(data).to.have.property(\"id\");\r\n});\r\nlet response=pm.response.json();\r\npm.environment.set(\"bookId\", response.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "apikey"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "api-key",
+            "value": "postmanrulz"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"The Ten Amendments\",\r\n  \"author\": \"suez ashraf\",\r\n  \"genre\": \"self-help\",\r\n  \"yearPublished\": 1999\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://library-api.postmanlabs.com/books",
+          "protocol": "https",
+          "host": [
+            "library-api",
+            "postmanlabs",
+            "com"
+          ],
+          "path": [
+            "books"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Retrieve the posted book",
+      "request": {
+        "auth": {
+          "type": "apikey"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://library-api.postmanlabs.com/books/{{BookId}}",
+          "protocol": "https",
+          "host": [
+            "library-api",
+            "postmanlabs",
+            "com"
+          ],
+          "path": [
+            "books",
+            "{{BookId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Post error validation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 400\", () => {\r\n    pm.expect(pm.response.code).to.equal(400);\r\n});\r\n\r\npm.test(\"Error message identifies missing title\", () => {\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data.message).to.include(\"title\");\r\n});\r\n\r\npm.test(\"Missing property is title\", () => {\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data.errors[0].params.missingProperty)\r\n        .to.equal(\"title\");\r\n});\r\npm.test(\"Status code is 400\", () => {\r\n    pm.expect(pm.response.code).to.equal(400);\r\n});\r\n\r\npm.test(\"Error identifies yearPublished\", () => {\r\n    const data = pm.response.json();\r\n    pm.expect(data.message).to.include(\"yearPublished\");\r\n});\r\n\r\npm.test(\"Expected data type is integer\", () => {\r\n    const data = pm.response.json();\r\n\r\n    pm.expect(data.errors[0].params.type).to.equal(\"integer\");\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "api-key",
+            "value": "postmanrulz"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"title\": \"Four sisters\",\r\n  \"author\": \"don Miguel Ruiz\",\r\n  \"genre\": \"self-help\",\r\n  \"yearPublished\": \"ninety\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://library-api.postmanlabs.com/books",
+          "protocol": "https",
+          "host": [
+            "library-api",
+            "postmanlabs",
+            "com"
+          ],
+          "path": [
+            "books"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "post to delete",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 201\", ()=>{\r\n    pm.response.to.have.status(201);\r\n});\r\npm.test(\"Book has the correct title\", function(){\r\n    const data=pm.response.json();\r\n    pm.expect(data.title).to.eql(\"Wolves paradise\");\r\n});\r\npm.test(\"response is JSON\", ()=>{\r\n    pm.expect(pm.response.headers.get(\"Content-Type\"));\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "api-key",
+            "value": "postmanrulz"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Wolves paradise\",\r\n  \"author\": \"samuel brune\",\r\n  \"genre\": \"fiction\",\r\n  \"yearPublished\": 2021\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://library-api.postmanlabs.com/books",
+          "protocol": "https",
+          "host": [
+            "library-api",
+            "postmanlabs",
+            "com"
+          ],
+          "path": [
+            "books"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Patch request",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\npm.test(\"Book title is updated\", function () {\r\n    let response = pm.response.json();\r\n\r\n    pm.expect(response.title).to.eql(\"The Five Agreements\");\r\n});\r\npm.test(\"Response time is less than 2000ms\", function () {\r\n    pm.expect(pm.response.responseTime).to.be.below(2000);\r\n});\r\npm.test(\"Response is JSON\", function () {\r\n    pm.expect(pm.response.headers.get(\"Content-Type\"))\r\n        .to.include(\"application/json\");\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "apikey",
+          "apikey": [
+            {
+              "key": "key",
+              "value": "api-key",
+              "type": "string"
+            },
+            {
+              "key": "value",
+              "value": "postmanrulz",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "api-key",
+            "value": "postmanrulz"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"The Five Agreements\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://library-api.postmanlabs.com/books/9910aab0-43d2-4cf0-aa11-9156c220b852",
+          "protocol": "https",
+          "host": [
+            "library-api",
+            "postmanlabs",
+            "com"
+          ],
+          "path": [
+            "books",
+            "9910aab0-43d2-4cf0-aa11-9156c220b852"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Patch error validation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "api-key",
+            "value": "postmanrulz"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"title\": 12345\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://library-api.postmanlabs.com/books/9910aab0-43d2-4cf0-aa11-9156c220b852",
+          "protocol": "https",
+          "host": [
+            "library-api",
+            "postmanlabs",
+            "com"
+          ],
+          "path": [
+            "books",
+            "9910aab0-43d2-4cf0-aa11-9156c220b852"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Retrival",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BaseURL}}/books/{{bookRCid}}",
+          "host": [
+            "{{BaseURL}}"
+          ],
+          "path": [
+            "books",
+            "{{bookRCid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Request",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "api-key",
+            "value": "postmanrulz"
+          }
+        ],
+        "url": {
+          "raw": "https://library-api.postmanlabs.com/books/65015541-6d4d-4202-a8e1-d6db229d8809",
+          "protocol": "https",
+          "host": [
+            "library-api",
+            "postmanlabs",
+            "com"
+          ],
+          "path": [
+            "books",
+            "65015541-6d4d-4202-a8e1-d6db229d8809"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "New Request",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "api-key",
+            "value": "postmanrulz"
+          }
+        ],
+        "url": {
+          "raw": "{{BaseURL}}/books/:id",
+          "host": [
+            "{{BaseURL}}"
+          ],
+          "path": [
+            "books",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": ""
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Path Parameter",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/books/:id",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "books",
+            ":id"
+          ],
+          "variable": [
+            {
+              "key": "id",
+              "value": "{{BookId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Query parameter",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{BaseURL}}/books?id={{BookId}}",
+          "host": [
+            "{{BaseURL}}"
+          ],
+          "path": [
+            "books"
+          ],
+          "query": [
+            {
+              "key": "id",
+              "value": "{{BookId}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Post RC",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "let response=pm.response.json();\r\npm.environment.set(\"bookRCid\", response.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "apikey",
+          "apikey": [
+            {
+              "key": "key",
+              "value": "api-key",
+              "type": "string"
+            },
+            {
+              "key": "value",
+              "value": "postmanrulz",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"title\":\"The servant of the lordship\",\r\n    \"author\":\"poshie\",\r\n    \"genre\": \"humor\",\r\n    \"yearPublished\": 2023\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BaseURL}}/books",
+          "host": [
+            "{{BaseURL}}"
+          ],
+          "path": [
+            "books"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Patch RC",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\",()=>{\r\n    pm.expect(pm.response.code).to.eql(200);\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "apikey",
+          "apikey": [
+            {
+              "key": "key",
+              "value": "api-key",
+              "type": "string"
+            },
+            {
+              "key": "value",
+              "value": "postmanrulz",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"author\":\"sushie sharma\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{BaseURL}}/books/{{bookRCid}}",
+          "host": [
+            "{{BaseURL}}"
+          ],
+          "path": [
+            "books",
+            "{{bookRCid}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Access token retrieval",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "let response = pm.response.json();\r\npm.environment.set(\"accessToken\", response.accessToken);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"username\": \"emilys\",\r\n    \"password\": \"emilyspass\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{LoginUrl}}",
+          "host": [
+            "{{LoginUrl}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "login-Access token",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "inavlid",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://dummyjson.com/auth/me",
+          "protocol": "https",
+          "host": [
+            "dummyjson",
+            "com"
+          ],
+          "path": [
+            "auth",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Pre Request",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "let username=\"user_\"+Date.now();\r\npm.environment.set(\"username\", username);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"firstName\":\"TestUser\",\r\n    \"lastName\":\"varied\",\r\n    \"username\":\"{{username}}\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "https://dummyjson.com/users/add",
+          "protocol": "https",
+          "host": [
+            "dummyjson",
+            "com"
+          ],
+          "path": [
+            "users",
+            "add"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "BaseURL",
+      "value": ""
+    },
+    {
+      "key": "BookId",
+      "value": ""
+    },
+    {
+      "key": "LoginUrl",
+      "value": ""
+    }
+  ]
+}
